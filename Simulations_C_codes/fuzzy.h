@@ -9,8 +9,11 @@ typedef struct{
     double PB;
 } FuzzySet;
 
-double trimemfunc(float value, FuzzySet *levels);
+//double trimemfunc(float value, FuzzySet *levels);
 double defuzzy(float* outs, int nouts);
 double fuzzyControl(double error, double derror);
+double* rules(double* e, double* de);
+double min_value(double a, double b);
+double* fuzzify(double value, FuzzySet *levels);
 
 #endif 

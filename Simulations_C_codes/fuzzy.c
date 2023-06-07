@@ -2,133 +2,129 @@
 #include "fuzzy.h"
 
 
-FuzzySet error_set = {-1.0, -0.5, 0.0, 0.5, 1.0};
-FuzzySet d_error_set = {-1.0, -0.5, 0.0, 0.5, 1.0};
-FuzzySet d_cycle_set = {0.0, 0.25, 0.5, 0.75, 1.0};
-
-double trimemfunc(float value, FuzzySet *levels){
-    if (value <= levels->NB){
-        return 0;
-    }
-    else if (value >= levels->PB){
-        return 1.0;
-    }
-    else if (value <= levels->NS){
-        return (value-levels->NB)/(levels->NS-levels->NB);
-    }
-    else if (value <= levels->ZZ){
-        return (value-levels->NS)/(levels->ZZ-levels->NS);
-    }
-    else if (value <= levels->PS){
-        return (levels->PS-value)/(levels->PS-levels->ZZ);
-    }
-    else {
-        return (levels->PB-value)/(levels->PB-levels->PS);
-    }
-
-}
-
-double fuzzy_control (double error, double derror){
-
-
-}
-
-//typedef struct{
-//    double NB;
-//    double NS;
-//    double ZZ;
-//    double PS;
- //   double PB;
-//} FuzzySet;
-
-/*
-FuzzySet error_set = {-1.0, -0.5, 0.0, 0.5, 1.0};
-FuzzySet d_error_set = {-1.0, -0.5, 0.0, 0.5, 1.0};
+FuzzySet error_set = {-0.125, -0.0625, 0.0, 0.0625, 0.125};
+FuzzySet d_error_set = {-0.125, -0.0625, 0.0, 0.0625, 0.125};
 FuzzySet d_cycle_set = {0.0, 0.25, 0.5, 0.75, 1.0};
 
 
-double trimemfunc(float value, FuzzySet *levels){
+
+double* fuzzify(double value, FuzzySet *levels){
+    
+    double fuzzy_array[5];
+    
     if (value <= levels->NB){
-        return 0;
+        fuzzy_array[0] = 1.0;
+        fuzzy_array[1] = 0.0;
+        fuzzy_array[2] = 0.0;
+        fuzzy_array[3] = 0.0;
+        fuzzy_array[4] = 0.0;
     }
-    else if (value >= levels->PB){
-        return 1.0;
+
+    else if (value > levels->NB && value <= levels->NS){
+        fuzzy_array[0] = (levels->NS - value)/(levels->NS - levels->NB);
+        fuzzy_array[1] = (value - levels->NB)/(levels->NS - levels->NB);
+        fuzzy_array[2] = 0.0;
+        fuzzy_array[3] = 0.0;
+        fuzzy_array[4] = 0.0;
     }
-    else if (value <= levels->NS){
-        return (value-levels->NB)/(levels->NS-levels->NB);
+
+    else if (value > levels->NS && value <= levels->ZZ){
+        fuzzy_array[0] = 0.0;
+        fuzzy_array[1] = (levels->ZZ - value)/(levels->ZZ - levels->NS);
+        fuzzy_array[2] = (value - levels->NS)/(levels->ZZ - levels->NS);
+        fuzzy_array[3] = 0.0;
+        fuzzy_array[4] = 0.0;
     }
-    else if (value <= levels->ZZ){
-        return (value-levels->NS)/(levels->ZZ-levels->NS);
+
+    else if (value > levels->ZZ && value <= levels->PS){
+        fuzzy_array[0] = 0.0;
+        fuzzy_array[1] = 0.0;
+        fuzzy_array[2] = (levels->PS - value)/(levels->PS - levels->ZZ);
+        fuzzy_array[3] = (value - levels->ZZ)/(levels->PS - levels->ZZ);
+        fuzzy_array[4] = 0.0;
     }
-    else if (value <= levels->PS){
-        return (levels->PS-value)/(levels->PS-levels->ZZ);
+
+    else if (value > levels->PS && value <= levels->PB){
+        fuzzy_array[0] = 0.0;
+        fuzzy_array[1] = 0.0;
+        fuzzy_array[2] = 0.0;
+        fuzzy_array[3] = (levels->PB - value)/(levels->PB - levels->PS);
+        fuzzy_array[4] = (value - levels->PS)/(levels->PB - levels->PS);
     }
+
     else {
-        return (levels->PB-value)/(levels->PB-levels->PS);
+        fuzzy_array[0] = 0.0;
+        fuzzy_array[1] = 0.0;
+        fuzzy_array[2] = 0.0;
+        fuzzy_array[3] = 0.0;
+        fuzzy_array[4] = 1.0;
     }
+
+    return fuzzy_array;
 
 }
 
-double fuzzyRules[5][5] = {
-    {1.0, 1.0, 1.0, 0.5, 0.0},
-    {1.0, 1.0, 0.5, 0.0, 0.5},
-    {1.0, 0.5, 0.0, 0.5, 1.0},
-    {0.5, 0.0, 0.5, 1.0, 1.0},
-    {0.0, 0.5, 1.0, 1.0, 1.0}
-};
-
-double defuzzy(float* outs, int nouts){
-    double sum = 0.0;
-    double tw = 0.0;
-
-    for (int i = 0; i< nouts; i++){
-        sum += outs[i]*d_cycle_set.PS;
-        tw += outs[i];
-    }
-
-    if (tw > 0.0){
-        sum /= tw;
-        return sum;
+double min_value(double a, double b){
+    if (a < b){
+        return a;
     }
     else{
-        return 0.0;
+        return b;
     }
+}
+
+double* rules(double* e, double* de){
+    double rule_results[25];
+
+    int rule = 0;
+
+    for (int i = 0; i < 5 ; i++){
+        for (int j = 0; j < 5; j++){
+            rule_results[rule] = min_value(e[i], de[j]);
+            rule++;
+        }
+
+    } 
+    return rule_results;
+    
+}
+
+
+
+double defuzzy(double* outs){
+
+    double sum = 0.0;
+    double den = 0.0;
+
+    for (int i = 0; i < 25 ; i++){
+        sum += outs[i]*((i+1)/25);
+        den += outs[i];
+    }
+
+    return sum/den;
+
+
 }
 
 
 double fuzzyControl(double error, double derror){
 
-    //double preverr = 0.0;
 
-    //double error = setpoint - measurment;
+    double* fuzzy_error;
+    double* fuzzy_derror;
+    double* rules_res;
+    double dc;
 
+    fuzzy_error = fuzzify(error, &error_set);
+    fuzzy_derror = fuzzify(derror, &d_error_set);
 
-    double eMem[5];
-    double edMem[5];
-    double out[5];
+    rules_res = rules(fuzzy_error, fuzzy_derror);
 
-    eMem[0] = trimemfunc(error, &error_set);
-    eMem[1] = trimemfunc(error, &error_set);
-    eMem[2] = trimemfunc(error, &error_set);
-    eMem[3] = trimemfunc(error, &error_set);
-    eMem[4] = trimemfunc(error, &error_set);
-
-    edMem[0]= trimemfunc(derror, &d_error_set);
-    edMem[1]= trimemfunc(derror, &d_error_set);
-    edMem[2]= trimemfunc(derror, &d_error_set);
-    edMem[3]= trimemfunc(derror, &d_error_set);
-    edMem[4]= trimemfunc(derror, &d_error_set);
-
-
-    for (int i=0; i<5; i++){
-        for (int j=0; j<5; j++){
-            out[i] = fuzzyRules[i][j]*eMem[i]*edMem[j];
-        }
-    }
-    
-    double dc = defuzzy(out, 5);
+    dc = defuzzy(rules_res);
 
     return dc;
+    
 
 
-}*/
+
+}
