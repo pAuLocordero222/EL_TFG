@@ -5,6 +5,7 @@
 
 #include <pid.c>
 
+//controller parameters
 
 #define PID_KP  10.8522f
 #define PID_KI  0.0356f
@@ -33,7 +34,7 @@
 #define SAMPLE_T 0.000008f
 
 
-
+//Calls the PI and PID functions
 double PID(double setpoint, double measurment){
 
     PIDController pid = {

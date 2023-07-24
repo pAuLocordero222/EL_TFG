@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include "fuzzy.h"
 
-
+//Membership functions 
 FuzzySet error_set = {-0.125, -0.0625, 0.0, 0.0625, 0.125};
 FuzzySet d_error_set = {-0.125, -0.0625, 0.0, 0.0625, 0.125};
 FuzzySet d_cycle_set = {0.0, 0.25, 0.5, 0.75, 1.0};
 
 
-
+//This function allows to fuzzyfy an entry using the membership functions
 double* fuzzify(double value, FuzzySet *levels){
     
     double fuzzy_array[5];
@@ -64,6 +64,7 @@ double* fuzzify(double value, FuzzySet *levels){
 
 }
 
+//This function returns the lower value betewwn two values
 double min_value(double a, double b){
     if (a < b){
         return a;
@@ -73,6 +74,7 @@ double min_value(double a, double b){
     }
 }
 
+//This function evaluates the fuzzy rules
 double* rules(double* e, double* de){
     double rule_results[25];
 
@@ -90,7 +92,7 @@ double* rules(double* e, double* de){
 }
 
 
-
+//This function make de defuzzify process using the centroid method
 double defuzzy(double* outs){
 
     double sum = 0.0;
@@ -107,6 +109,7 @@ double defuzzy(double* outs){
 }
 
 
+//This function replicates the controller functionality
 double fuzzyControl(double error, double derror){
 
 

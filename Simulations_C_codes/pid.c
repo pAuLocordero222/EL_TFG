@@ -1,7 +1,7 @@
 #include "pid.h"
 
 
-
+//Initialize the variables with 0
 void PIDController_init(PIDController *pid){
 
 
@@ -13,7 +13,7 @@ void PIDController_init(PIDController *pid){
 
 }
 
-
+//Evaluates the inputs to give a contol output, using the pid method
 double PIDController_update(PIDController *pid, double setpoint, double measurment){
 
 
